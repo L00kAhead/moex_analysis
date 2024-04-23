@@ -69,16 +69,18 @@ def main():
     
     stock_data_fetcher = StockDataFetcher(start_date, end_date, stock_list)
     stock_data_fetcher.fetch_and_write_data(stocks_url, stock_output)
+
     header = "BOARDID;TRADEDATE;SHORTNAME;SECID;NUMTRADES;VALUE;OPEN;LOW;HIGH;LEGALCLOSEPRICE;WAPRICE;CLOSE;VOLUME;MARKETPRICE2;MARKETPRICE3;ADMITTEDQUOTE;MP2VALTRD;MARKETPRICE3TRADESVALUE;ADMITTEDVALUE;WAVAL;TRADINGSESSION;CURRENCYID;TRENDCLSPR\n"
     remove_header('raw_data.csv', 'stocks_data.csv', header)
 
     #moscow index
-    index_output = "imoex_index.csv" 
+    index_output = "imoex_index_r.csv" 
     index_data_fetcher = StockDataFetcher(start_date, end_date, ['IMOEX'])
     index_url = "http://iss.moex.com/iss/history/engines/stock/markets/index/boards/SNDX/securities/"
     index_data_fetcher.fetch_and_write_data(index_url, index_output)
+
     index_header = "BOARDID;SECID;TRADEDATE;SHORTNAME;NAME;CLOSE;OPEN;HIGH;LOW;VALUE;DURATION;YIELD;DECIMALS;CAPITALIZATION;CURRENCYID;DIVISOR;TRADINGSESSION;VOLUME\n"
-    remove_header('imoex_index.csv', 'imoex_index.csv', index_header)
+    remove_header('imoex_index_r.csv', 'imoex_index.csv', index_header)
     
 
 if __name__ == "__main__":
