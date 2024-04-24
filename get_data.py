@@ -1,6 +1,6 @@
 import requests
 import csv
-from  api_params import stock_params, index_params 
+from api_params import stock_params, index_params
 
 class DataFetcher:
     def fetch_data(self, url):
@@ -22,9 +22,9 @@ class DataWriter:
             print(f"Failed to write to CSV file: {e}")
 
 class DataProcessor:
-    def __init__(self, data_fetcher, csv_writer, start_date, end_date, stock_list):
-        self.data_fetcher = data_fetcher
-        self.csv_writer = csv_writer
+    def __init__(self, start_date, end_date, stock_list):
+        self.data_fetcher = DataFetcher()
+        self.data_writer = DataWriter()
         self.start_date = start_date
         self.end_date = end_date
         self.stock_list = stock_list
@@ -32,16 +32,16 @@ class DataProcessor:
     def fetch_and_write_data(self, url: str, output_file: str):
         for s in self.stock_list:
             base_url = f"{url}{s}.csv"
-            for start in range(0, 400, 100): #there were 318 entries and a single response returns 100 entries
-                url = f"{base_url}?from={self.start_date}&till={self.end_date}&start={start}"
-                print("Fetching...")
-                data = self.data_fetcher.fetch_data(url)
+            print(f"Fetching {s}...")
+            for start in range(0, 400, 100):
+                f_url = f"{base_url}?from={self.start_date}&till={self.end_date}&start={start}"
+                data = self.data_fetcher.fetch_data(f_url)
                 if data:
                     try:
                         rows = data.strip().split('\n')
                         data_rows = [row.split(';') for row in rows[2:]]
                         for row in data_rows:
-                            self.csv_writer.write_to_csv(row, output_file)
+                            self.data_writer.write_to_csv(row, output_file)
                     except Exception as e:
                         print(f"Error processing data: {e}")
 
@@ -64,14 +64,10 @@ class DataProcessor:
 
 def main():
 
-    data_fetcher = DataFetcher()
-    data_writer = DataWriter()
-
     stock_data = DataProcessor(
-        data_fetcher=data_fetcher,
-        data_writer=data_writer,
         start_date=stock_params['start_date'],
-        end_date=stock_params['end_date']
+        end_date=stock_params['end_date'],
+        stock_list=stock_params['stock_list']
     )
     stock_data.fetch_and_write_data(
         url=stock_params['url'], 
@@ -81,16 +77,16 @@ def main():
 
  
     index_data = DataProcessor(
-        data_fetcher=data_fetcher,
-        data_writer=data_writer,
         start_date=index_params['start_date'],
-        end_date=index_params['end_date']
+        end_date=index_params['end_date'],
+        stock_list=index_params['index_name']
+
     )
     index_data.fetch_and_write_data(
         url=index_params['url'],
         output_file=index_params['output']
     )
-    DataProcessor.remove_header(index_params['output'], 'imoex_index.csv', index_params['header'])
+    DataProcessor.remove_header(index_params['output'], 'index_data.csv', index_params['header'])
     
 
 if __name__ == "__main__":
